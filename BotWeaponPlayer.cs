@@ -1,7 +1,7 @@
 interface IWeapon
 {
-    bool CanFire(IPlayer player);
-    void Fire(IPlayer player);
+    bool CanFire(IHero hero);
+    void Fire(IHero hero);
 }
 
 class Weapon : IWeapon
@@ -24,22 +24,22 @@ class Weapon : IWeapon
         _bullets = bullets;
     }
 
-    public bool CanFire(IPlayer player)
+    public bool CanFire(IHero hero)
     {
-        return player.CanTakeDamage(_damage) && HasBullets;
+        return hero.CanTakeDamage(_damage) && HasBullets;
     }
 
-    public void Fire(IPlayer player)
+    public void Fire(IHero hero)
     {
-        if (CanFire(player) == false)
+        if (CanFire(hero) == false)
             throw new ArgumentException();
 
-        player.TakeDamage(_damage);
+        hero.TakeDamage(_damage);
         _bullets -= 1;
     }
 }
 
-interface IPlayer
+interface IHero
 {
     bool IsDead { get; }
     
@@ -47,13 +47,13 @@ interface IPlayer
     void TakeDamage(int amount);
 }
 
-class Player : IPlayer
+class Hero : IHero
 {
     private IHealth _health;
 
     public bool IsDead => _health.IsEmpty;
 
-    public Player(IHealth health)
+    public Hero(IHealth health)
     {
         _health = health;
     }
@@ -113,8 +113,8 @@ class Health : IHealth
 
 interface IBot
 {
-    bool CanAttack(IPlayer player);
-    void Attack(IPlayer player);
+    bool CanAttack(IHero hero);
+    void Attack(IHero hero);
 }
 
 class Bot : IBot
@@ -126,22 +126,16 @@ class Bot : IBot
         _weapon = weapon;
     }
 
-    public void OnSeePlayer(Player player)
+    public bool CanAttack(IHero hero)
     {
-        if (CanAttack(player))
-            Attack(player);
+        return _weapon.CanFire(hero);
     }
 
-    public bool CanAttack(IPlayer player)
+    public void Attack(IHero hero)
     {
-        return _weapon.CanFire(player);
-    }
-
-    public void Attack(IPlayer player)
-    {
-        if (CanAttack(player) == false)
+        if (CanAttack(hero) == false)
             throw new InvalidOperationException();
 
-        _weapon.Fire(player);
+        _weapon.Fire(hero);
     }
 }
