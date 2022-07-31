@@ -41,6 +41,8 @@ class Weapon : IWeapon
 
 interface IPlayer
 {
+    bool IsDead { get; }
+    
     bool CanTakeDamage(int amount);
     void TakeDamage(int amount);
 }
